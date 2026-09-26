@@ -19,20 +19,6 @@
         Terms & Conditions before accepting them.
     </p>
 
-    <textarea
-        id="terms"
-        rows="10"
-        cols="60"
-        placeholder="Paste Terms & Conditions here...">
-    </textarea>
-
-    <br><br>
-
-    <button onclick="analyzeTerms()">Analyze Terms</button>
-
-    <button onclick="clearResult()">Clear</button>
-
-    <div id="result"></div>
     <section class="how-it-works">
 
     <h2>🔍 How Privacy Guard Works</h2>
@@ -140,6 +126,15 @@
     </div>
 
 </section>
+<div style="text-align: center; margin: 30px;">
+    <button onclick="goNext()">Next →</button>
+</div>
+
+<script>
+    function goNext() {
+        window.location.href = "terms.html";
+    }
+</script>
 
     <script src="script.js"></script>
 
