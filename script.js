@@ -1,5 +1,9 @@
 function analyzeTerms() {
-    const terms = document.getElementById("terms").value.toLowerCase();
+    const terms = document
+        .getElementById("terms")
+        .value
+        .toLowerCase();
+
     const result = document.getElementById("result");
 
     if (terms.trim() === "") {
@@ -10,111 +14,131 @@ function analyzeTerms() {
     let score = 0;
     let warnings = [];
 
-    // Personal Data
-    if (terms.includes("personal data") || terms.includes("personal information")) {
-        score += 30;
-        warnings.push(`
-            <div class="risk high">
-                🔴 <b>HIGH RISK: Personal information may be collected.</b>
-                <p>Why risky? Your personal information may be stored or processed by the service.</p>
-            </div>
-        `);
+    const checks = [
+        {
+            phrases: [
+                "personal data",
+                "personal information",
+                "collect your data",
+                "information about you",
+                "user data"
+            ],
+            points: 30,
+            type: "high",
+            title: "Personal information may be collected.",
+            why: "Your information may be collected, stored or processed."
+        },
+        {
+            phrases: [
+                "third party",
+                "third parties",
+                "marketing partners",
+                "share your data",
+                "shared with advertisers",
+                "share your information",
+                "provided to marketing"
+            ],
+            points: 30,
+            type: "high",
+            title: "Your data may be shared with other organizations.",
+            why: "Other companies or partners may receive your information."
+        },
+        {
+            phrases: [
+                "location",
+                "whereabouts",
+                "where you are",
+                "where you go",
+                "physical movements"
+            ],
+            points: 15,
+            type: "medium",
+            title: "Your location may be monitored or collected.",
+            why: "Location information can reveal places you visit."
+        },
+        {
+            phrases: [
+                "advertising",
+                "advertisements",
+                "targeted ads",
+                "personalized ads",
+                "marketing purposes"
+            ],
+            points: 10,
+            type: "medium",
+            title: "Your information may be used for advertising.",
+            why: "Information may be used to personalize marketing."
+        },
+        {
+            phrases: [
+                "track",
+                "tracking",
+                "tracked",
+                "monitored",
+                "monitor your activity",
+                "online behavior",
+                "online activity"
+            ],
+            points: 15,
+            type: "medium",
+            title: "Your online activity may be monitored.",
+            why: "Your activity may be observed to understand your behavior."
+        }
+    ];
+
+    for (const check of checks) {
+        const matched = check.phrases.some(phrase =>
+            terms.includes(phrase)
+        );
+
+        if (matched) {
+            score += check.points;
+
+            warnings.push(`
+                <div class="risk ${check.type}">
+                    <b>${check.type === "high" ? "🔴 HIGH RISK:" : "🟠 MEDIUM RISK:"}
+                    ${check.title}</b>
+                    <p>Why risky? ${check.why}</p>
+                </div>
+            `);
+        }
     }
 
-    // Third Party
-    if (terms.includes("third party") || terms.includes("third parties")) {
-        score += 30;
-        warnings.push(`
-            <div class="risk high">
-                🔴 <b>HIGH RISK: Data may be shared with third parties.</b>
-                <p>Why risky? Other companies may receive or process your information.</p>
-            </div>
-        `);
-    }
+    score = Math.min(score, 100);
 
-    // Location
-    if (terms.includes("location")) {
-        score += 15;
-        warnings.push(`
-            <div class="risk medium">
-                🟠 <b>MEDIUM RISK: Location data may be collected.</b>
-                <p>Why risky? Your location information may reveal where you are or where you go.</p>
-            </div>
-        `);
-    }
-
-    // Advertising
-    if (terms.includes("advertising")) {
-        score += 10;
-        warnings.push(`
-            <div class="risk medium">
-                🟠 <b>MEDIUM RISK: Your data may be used for advertising.</b>
-                <p>Why risky? Your information may be used to personalize advertisements.</p>
-            </div>
-        `);
-    }
-
-    // Tracking
-    if (terms.includes("track") || terms.includes("tracking")) {
-        score += 15;
-        warnings.push(`
-            <div class="risk medium">
-                🟠 <b>MEDIUM RISK: Your online activity may be tracked.</b>
-                <p>Why risky? Your online behavior may be monitored to understand your activities.</p>
-            </div>
-        `);
-    }
-
-    if (score > 100) {
-        score = 100;
-    }
-
-    let level = "";
+    let level;
+    let recommendation;
 
     if (score >= 70) {
         level = "🔴 HIGH PRIVACY RISK";
+        recommendation = "Review these Terms carefully before accepting.";
     } else if (score >= 40) {
         level = "🟠 MEDIUM PRIVACY RISK";
+        recommendation = "Check the Privacy Policy and app permissions.";
     } else if (score > 0) {
         level = "🟡 LOW PRIVACY RISK";
+        recommendation = "Read the highlighted risks before accepting.";
     } else {
-        level = "🟢 NO COMMON RISKS DETECTED";
+        level = "🟢 NO MATCHING RISKS DETECTED";
+        recommendation = "Review the complete Privacy Policy before accepting.";
     }
 
-     let recommendation = "";
-
-    if (score >= 70) {
-        recommendation = "⚠️ Review these Terms carefully before accepting.";
-    } else if (score >= 40) {
-        recommendation = "⚠️ Check the Privacy Policy and app permissions.";
-    } else if (score > 0) {
-        recommendation = "ℹ️ Read the highlighted terms before accepting.";
-    } else {
-        recommendation = "✅ No common privacy risks were detected.";
-    }
-
-    if (warnings.length === 0) {
-        result.innerHTML = `
-            <h3>Privacy Guard Analysis</h3>
-            <h2>Privacy Risk Score: ${score}/100</h2>
-            <h3>${level}</h3>
-            <p>✅ No common risky terms detected.</p>
-            <h3>What should you do?</h3>
-            <p>${recommendation}</p>
-        `;
-    } else {
-        result.innerHTML = `
-            <h3>Privacy Guard Analysis</h3>
-            <h2>Privacy Risk Score: ${score}/100</h2>
-            <h3>${level}</h3>
-
-            <h3>🚨 Trap Finder</h3>
-            ${warnings.join("")}
-
-            <h3>💡 What should you do?</h3>
-            <p>${recommendation}</p>
-        `;
-    }
+    result.innerHTML = `
+        <h3>Privacy Guard Analysis</h3>
+        <h2>Privacy Risk Score: ${score}/100</h2>
+        <div class="score-bar">
+            <div class="score-fill" style="width: ${score}%"></div>
+        </div>
+        <h3>${level}</h3>
+        <h3>🚨 Trap Finder</h3>
+        ${
+            warnings.length
+                ? warnings.join("")
+                : "<p>No matching risk phrases were detected. This does not guarantee the terms are safe.</p>"
+        }
+        <h3>💡 What should you do?</h3>
+        <p>${recommendation}</p>
+    `;
 }
 
 function clearResult() {
